@@ -6,7 +6,7 @@ This portfolio serves as a digital resume to showcase my skills, projects, exper
 
 ## 🔗 Live Preview
 
-🌍 [Visit My Portfolio](https://your-live-portfolio-link.com)
+🌍 [Visit My Portfolio](https://shehriyar-ali-rustam.github.io/Updated-Personal-Portfolio/)
 📄 [Download Resume](./myresume.pdf)
 
 ---
