@@ -225,7 +225,7 @@ srtop.reveal('.skills .container .bar', { delay: 400 });
 srtop.reveal('.education .box', { interval: 200 });
 
 /* SCROLL PROJECTS */
-srtop.reveal('.work .box', { interval: 200 });
+srtop.reveal('.projects .box', { interval: 200 });
 
 /* SCROLL EXPERIENCE */
 srtop.reveal('.experience .timeline', { delay: 400 });
@@ -234,3 +234,164 @@ srtop.reveal('.experience .timeline .container', { interval: 400 });
 /* SCROLL CONTACT */
 srtop.reveal('.contact .container', { delay: 400 });
 srtop.reveal('.contact .container .form-group', { delay: 400 });
+
+
+// ===== PROJECT MANAGEMENT SYSTEM =====
+let editMode = false;
+let nextProjectId = 7; // Start from 7 since we have 6 demo projects
+
+// Toggle edit mode
+function toggleEditMode() {
+    editMode = !editMode;
+    const actionButtons = document.querySelectorAll('.project-actions');
+    const editModeText = document.getElementById('edit-mode-text');
+
+    actionButtons.forEach(btn => {
+        btn.style.display = editMode ? 'flex' : 'none';
+    });
+
+    editModeText.textContent = editMode ? 'Exit Edit Mode' : 'Edit Mode';
+}
+
+// Open modal for adding new project
+function openAddProjectModal() {
+    document.getElementById('project-modal').style.display = 'block';
+    document.getElementById('modal-title').textContent = 'Add New Project';
+    document.getElementById('project-form').reset();
+    document.getElementById('project-id').value = '';
+}
+
+// Close modal
+function closeProjectModal() {
+    document.getElementById('project-modal').style.display = 'none';
+    document.getElementById('project-form').reset();
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('project-modal');
+    if (event.target == modal) {
+        closeProjectModal();
+    }
+}
+
+// Edit existing project
+function editProject(projectId) {
+    const projectBox = document.querySelector(`[data-project-id="${projectId}"]`);
+    if (!projectBox) return;
+
+    const name = projectBox.querySelector('.tag h3').textContent;
+    const desc = projectBox.querySelector('.desc p').textContent;
+    const image = projectBox.querySelector('img').src;
+    const viewLink = projectBox.querySelector('.btns a:first-child').href;
+    const codeLink = projectBox.querySelector('.btns a:last-child').href;
+
+    document.getElementById('project-id').value = projectId;
+    document.getElementById('project-name').value = name;
+    document.getElementById('project-desc').value = desc;
+    document.getElementById('project-image').value = image;
+    document.getElementById('project-view-link').value = viewLink;
+    document.getElementById('project-code-link').value = codeLink;
+
+    document.getElementById('modal-title').textContent = 'Edit Project';
+    document.getElementById('project-modal').style.display = 'block';
+}
+
+// Save project (add or update)
+function saveProject(event) {
+    event.preventDefault();
+
+    const projectId = document.getElementById('project-id').value;
+    const name = document.getElementById('project-name').value;
+    const desc = document.getElementById('project-desc').value;
+    const image = document.getElementById('project-image').value;
+    const viewLink = document.getElementById('project-view-link').value;
+    const codeLink = document.getElementById('project-code-link').value;
+
+    if (projectId) {
+        // Update existing project
+        updateProjectInDOM(projectId, name, desc, image, viewLink, codeLink);
+    } else {
+        // Add new project
+        addProjectToDOM(name, desc, image, viewLink, codeLink);
+    }
+
+    closeProjectModal();
+}
+
+// Update project in DOM
+function updateProjectInDOM(projectId, name, desc, image, viewLink, codeLink) {
+    const projectBox = document.querySelector(`[data-project-id="${projectId}"]`);
+    if (!projectBox) return;
+
+    projectBox.querySelector('.tag h3').textContent = name;
+    projectBox.querySelector('.desc p').textContent = desc;
+    projectBox.querySelector('img').src = image;
+    projectBox.querySelector('img').alt = name;
+    projectBox.querySelector('.btns a:first-child').href = viewLink;
+    projectBox.querySelector('.btns a:last-child').href = codeLink;
+
+    // Re-initialize tilt effect
+    VanillaTilt.init(projectBox, { max: 15 });
+}
+
+// Add new project to DOM
+function addProjectToDOM(name, desc, image, viewLink, codeLink) {
+    const container = document.getElementById('projects-container');
+    const newProjectId = nextProjectId++;
+
+    const projectHTML = `
+    <div class="box tilt" data-project-id="${newProjectId}">
+      <div class="project-actions" style="display: ${editMode ? 'flex' : 'none'};">
+        <button class="action-btn edit-btn" onclick="editProject(${newProjectId})" title="Edit">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="action-btn delete-btn" onclick="deleteProject(${newProjectId})" title="Delete">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+      <img draggable="false" src="${image}" alt="${name}" />
+      <div class="content">
+        <div class="tag">
+          <h3>${name}</h3>
+        </div>
+        <div class="desc">
+          <p>${desc}</p>
+          <div class="btns">
+            <a href="${viewLink}" class="btn" target="_blank"><i class="fas fa-eye"></i> View</a>
+            <a href="${codeLink}" class="btn" target="_blank">Code <i class="fas fa-code"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+    container.insertAdjacentHTML('beforeend', projectHTML);
+
+    // Initialize tilt and scroll reveal for new project
+    const newBox = container.lastElementChild;
+    VanillaTilt.init(newBox, { max: 15 });
+    srtop.reveal(newBox, { interval: 200 });
+}
+
+// Delete project
+function deleteProject(projectId) {
+    if (confirm('Are you sure you want to delete this project?')) {
+        const projectBox = document.querySelector(`[data-project-id="${projectId}"]`);
+        if (projectBox) {
+            projectBox.style.animation = 'fadeOut 0.3s';
+            setTimeout(() => {
+                projectBox.remove();
+            }, 300);
+        }
+    }
+}
+
+// Add fadeOut animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0; transform: scale(0.8); }
+    }
+`;
+document.head.appendChild(style);
